@@ -3,6 +3,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.generics import (CreateAPIView, DestroyAPIView,
                                      ListAPIView, RetrieveAPIView,
                                      UpdateAPIView)
+from rest_framework.permissions import AllowAny
 
 from users.models import CustomUser, Payment
 from users.serializer import CustomUserSerializer, PaymentSerializer
@@ -13,6 +14,7 @@ class CustomUserCreateAPIView(CreateAPIView):
 
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+    permission_classes = [AllowAny]
 
 
 class CustomUserUpdateAPIView(UpdateAPIView):
