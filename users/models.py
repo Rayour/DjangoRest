@@ -36,11 +36,11 @@ class Payment(models.Model):
     ]
 
     user = models.ForeignKey(CustomUser, verbose_name="Пользователь", on_delete=models.CASCADE, blank=True, null=True,
-                             related_name="users")
+                             related_name="payments")
     course = models.ForeignKey(Course, verbose_name="Курс", on_delete=models.CASCADE, blank=True, null=True,
-                               related_name="courses")
+                               related_name="payments")
     lesson = models.ForeignKey(Lesson, verbose_name="Урок", on_delete=models.CASCADE, blank=True, null=True,
-                               related_name="lessons")
+                               related_name="payments")
     payment_date = models.DateTimeField(verbose_name="Дата оплаты", blank=True, null=True)
     payment_amount = models.FloatField(verbose_name="Сумма платежа")
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
