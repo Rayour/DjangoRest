@@ -14,7 +14,7 @@ from materials.views import (
 app_name = MaterialsConfig.name
 
 router = SimpleRouter()
-router.register("courses", CourseViewSet)
+router.register("courses", CourseViewSet, basename="courses")
 
 urlpatterns = [
     path("lessons/", LessonListAPIView.as_view(), name="lessons_list"),
