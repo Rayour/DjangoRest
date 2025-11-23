@@ -8,24 +8,45 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('materials', '0001_initial'),
-        ('users', '0002_payment'),
+        ("materials", "0001_initial"),
+        ("users", "0002_payment"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='payment',
-            name='course',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='payments', to='materials.course', verbose_name='Курс'),
+            model_name="payment",
+            name="course",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payments",
+                to="materials.course",
+                verbose_name="Курс",
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='lesson',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='payments', to='materials.lesson', verbose_name='Урок'),
+            model_name="payment",
+            name="lesson",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payments",
+                to="materials.lesson",
+                verbose_name="Урок",
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='payments', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
+            model_name="payment",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payments",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Пользователь",
+            ),
         ),
     ]

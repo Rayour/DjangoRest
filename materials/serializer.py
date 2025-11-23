@@ -9,11 +9,12 @@ class LessonSerializer(ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CourseSerializer(ModelSerializer):
     """Сериализатор для класса курсов обучения"""
+
     lessons_count = SerializerMethodField()
     lessons = LessonSerializer(many=True, read_only=True)
 
@@ -23,4 +24,13 @@ class CourseSerializer(ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id', 'name', 'description', 'image', 'lessons_count', 'lessons', 'created_at', 'updated_at',)
+        fields = (
+            "id",
+            "name",
+            "description",
+            "image",
+            "lessons_count",
+            "lessons",
+            "created_at",
+            "updated_at",
+        )
