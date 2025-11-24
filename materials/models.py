@@ -1,13 +1,30 @@
 from django.db import models
 
+from users.models import CustomUser
+
 
 class Course(models.Model):
     """Класс курса обучения"""
 
     name = models.CharField(max_length=300, verbose_name="Название")
-    description = models.TextField(verbose_name="Описание", help_text="Добавьте описание курса")
-    image = models.ImageField(upload_to="media/", null=True, blank=True, verbose_name="Превью",
-                              help_text="Загрузите изображение для превью курса")
+    description = models.TextField(
+        verbose_name="Описание", help_text="Добавьте описание курса"
+    )
+    image = models.ImageField(
+        upload_to="media/",
+        null=True,
+        blank=True,
+        verbose_name="Превью",
+        help_text="Загрузите изображение для превью курса",
+    )
+    owner = models.ForeignKey(
+        CustomUser,
+        verbose_name="Владелец",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="courses",
+    )
     created_at = models.DateTimeField(verbose_name="Дата создания", auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name="Дата обновления", auto_now=True)
 
@@ -26,11 +43,31 @@ class Lesson(models.Model):
     """Модель урока"""
 
     name = models.CharField(max_length=50, verbose_name="Название")
-    description = models.TextField(verbose_name="Описание", null=True, blank=True, help_text="Введите описание урока")
-    image = models.ImageField(upload_to="media/", null=True, blank=True, verbose_name="Превью",
-                              help_text="Загрузите изображение для превью урока")
+    description = models.TextField(
+        verbose_name="Описание",
+        null=True,
+        blank=True,
+        help_text="Введите описание урока",
+    )
+    image = models.ImageField(
+        upload_to="media/",
+        null=True,
+        blank=True,
+        verbose_name="Превью",
+        help_text="Загрузите изображение для превью урока",
+    )
     link = models.CharField(max_length=250, verbose_name="Ссылка на видео урока")
-    course = models.ForeignKey(Course, verbose_name="Курс", on_delete=models.CASCADE, related_name="lessons")
+    course = models.ForeignKey(
+        Course, verbose_name="Курс", on_delete=models.CASCADE, related_name="lessons"
+    )
+    owner = models.ForeignKey(
+        CustomUser,
+        verbose_name="Владелец",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="lessons",
+    )
     created_at = models.DateTimeField(verbose_name="Дата создания", auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name="Дата обновления", auto_now=True)
 

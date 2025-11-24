@@ -8,42 +8,117 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Course',
+            name="Course",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=300, verbose_name='Название')),
-                ('description', models.TextField(help_text='Добавьте описание курса', verbose_name='Описание')),
-                ('image', models.ImageField(blank=True, help_text='Загрузите изображение для превью курса', null=True, upload_to='media/', verbose_name='Превью')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Дата обновления')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=300, verbose_name="Название")),
+                (
+                    "description",
+                    models.TextField(
+                        help_text="Добавьте описание курса", verbose_name="Описание"
+                    ),
+                ),
+                (
+                    "image",
+                    models.ImageField(
+                        blank=True,
+                        help_text="Загрузите изображение для превью курса",
+                        null=True,
+                        upload_to="media/",
+                        verbose_name="Превью",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата создания"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
+                ),
             ],
             options={
-                'verbose_name': 'курс',
-                'verbose_name_plural': 'курсы',
-                'ordering': ['name', 'created_at'],
+                "verbose_name": "курс",
+                "verbose_name_plural": "курсы",
+                "ordering": ["name", "created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Lesson',
+            name="Lesson",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, verbose_name='Название')),
-                ('description', models.TextField(blank=True, help_text='Введите описание урока', null=True, verbose_name='Описание')),
-                ('image', models.ImageField(blank=True, help_text='Загрузите изображение для превью урока', null=True, upload_to='media/', verbose_name='Превью')),
-                ('link', models.CharField(max_length=250, verbose_name='Ссылка на видео урока')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Дата обновления')),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='materials.course', verbose_name='Курс')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50, verbose_name="Название")),
+                (
+                    "description",
+                    models.TextField(
+                        blank=True,
+                        help_text="Введите описание урока",
+                        null=True,
+                        verbose_name="Описание",
+                    ),
+                ),
+                (
+                    "image",
+                    models.ImageField(
+                        blank=True,
+                        help_text="Загрузите изображение для превью урока",
+                        null=True,
+                        upload_to="media/",
+                        verbose_name="Превью",
+                    ),
+                ),
+                (
+                    "link",
+                    models.CharField(
+                        max_length=250, verbose_name="Ссылка на видео урока"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Дата создания"
+                    ),
+                ),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, verbose_name="Дата обновления"),
+                ),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lessons",
+                        to="materials.course",
+                        verbose_name="Курс",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'урок',
-                'verbose_name_plural': 'уроки',
-                'ordering': ['name', 'created_at'],
+                "verbose_name": "урок",
+                "verbose_name_plural": "уроки",
+                "ordering": ["name", "created_at"],
             },
         ),
     ]

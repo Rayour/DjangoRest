@@ -8,13 +8,23 @@ class PaymentSerializer(ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CustomUserSerializer(ModelSerializer):
     """Сериализатор для пользователя"""
+
     payments = PaymentSerializer(many=True, read_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'payments', 'phone_number', 'city', 'avatar',)
+        fields = (
+            "id",
+            "email",
+            "payments",
+            "phone_number",
+            "city",
+            "avatar",
+            "username",
+            "password",
+        )
