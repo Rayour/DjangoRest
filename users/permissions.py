@@ -18,6 +18,4 @@ class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         """Метод проверки принадлежности записи пользователю"""
 
-        return (obj.owner == request.user) & ~request.user.groups.filter(
-            name="moders"
-        ).exists()
+        return obj.owner == request.user
