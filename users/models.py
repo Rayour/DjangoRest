@@ -46,8 +46,6 @@ class CustomUser(AbstractUser):
 class Payment(models.Model):
     """Модель платежа"""
 
-    from materials.models import Course, Lesson
-
     PAYMENT_METHODS = [("cash", "наличные"), ("transfer", "перевод на счет")]
 
     user = models.ForeignKey(
@@ -59,7 +57,7 @@ class Payment(models.Model):
         related_name="payments",
     )
     course = models.ForeignKey(
-        Course,
+        "materials.Course",
         verbose_name="Курс",
         on_delete=models.CASCADE,
         blank=True,
@@ -67,7 +65,7 @@ class Payment(models.Model):
         related_name="payments",
     )
     lesson = models.ForeignKey(
-        Lesson,
+        "materials.Lesson",
         verbose_name="Урок",
         on_delete=models.CASCADE,
         blank=True,
