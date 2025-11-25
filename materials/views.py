@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from materials.models import Course, Lesson
+from materials.paginators import LessonsCoursesPaginator
 from materials.serializer import CourseSerializer, LessonSerializer
 from users.permissions import IsModer, IsOwner
 
@@ -17,6 +18,7 @@ class CourseViewSet(ModelViewSet):
     """Вьюсет для курса обучения"""
 
     serializer_class = CourseSerializer
+    pagination_class = LessonsCoursesPaginator
 
     def get_queryset(self):
         if self.request.user.groups.filter(name="moders").exists():
@@ -75,6 +77,7 @@ class LessonListAPIView(ListAPIView):
     """Класс для получения списка уроков"""
 
     serializer_class = LessonSerializer
+    pagination_class = LessonsCoursesPaginator
 
     def get_queryset(self):
         if self.request.user.groups.filter(name="moders").exists():
