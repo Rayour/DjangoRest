@@ -33,11 +33,11 @@ class CourseViewSet(ModelViewSet):
         """Метод проверки прав"""
 
         if self.action == "create":
-            self.permission_classes = ~IsModer
+            self.permission_classes = (~IsModer,)
         elif self.action in ["update", "retrieve"]:
             self.permission_classes = (IsModer | IsOwner,)
         elif self.action == "destroy":
-            self.permission_classes = IsOwner | ~IsModer
+            self.permission_classes = (IsOwner | ~IsModer,)
         return super().get_permissions()
 
 

@@ -6,10 +6,14 @@ from rest_framework.generics import (
     ListAPIView,
     RetrieveAPIView,
     UpdateAPIView,
+    get_object_or_404,
 )
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from users.models import CustomUser, Payment
+from materials.models import Course
+from users.models import CustomUser, Payment, Subscription
 from users.serializer import CustomUserSerializer, PaymentSerializer
 
 
@@ -94,3 +98,24 @@ class PaymentListAPIView(ListAPIView):
     ordering_fields = [
         "payment_date",
     ]
+
+
+class SubscriptionCreateOrDeleteAPIView(APIView):
+    """Метод для добавления/удаления подписки пользователя на курс"""
+
+    def post(self, request):
+        user = self.request.user
+        course_id = self.request.data.get("course")
+        course_item = get_object_or_404(Course, pk=course_id)
+
+        subs_item = user.subscriptions.filter(course__id=course_id)
+
+        if subs_item.exists():
+            subs_item.delete()
+            message = "подписка удалена"
+        else:
+            subs_item = Subscription(user=user, course=course_item)
+            subs_item.save()
+            message = "подписка добавлена"
+
+        return Response({"message": message})
