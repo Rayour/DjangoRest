@@ -1,4 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import (
     CreateAPIView,
@@ -18,7 +21,7 @@ from users.serializer import CustomUserSerializer, PaymentSerializer
 
 
 class CustomUserCreateAPIView(CreateAPIView):
-    """Класс для создания пользователя"""
+    """Создание пользователя"""
 
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -33,63 +36,63 @@ class CustomUserCreateAPIView(CreateAPIView):
 
 
 class CustomUserUpdateAPIView(UpdateAPIView):
-    """Класс для обновления пользователя"""
+    """Обновление пользователя"""
 
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
 
 class CustomUserDestroyAPIView(DestroyAPIView):
-    """Класс для удаления пользователя"""
+    """Удаление пользователя"""
 
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
 
 class CustomUserRetrieveAPIView(RetrieveAPIView):
-    """Класс для получения пользователя"""
+    """Получение пользователя"""
 
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
 
 class CustomUserListAPIView(ListAPIView):
-    """Класс для получения списка пользователей"""
+    """Получение списка пользователей"""
 
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
 
 class PaymentCreateAPIView(CreateAPIView):
-    """Класс для создания платежа"""
+    """Создание платежа"""
 
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
 
 
 class PaymentUpdateAPIView(UpdateAPIView):
-    """Класс для обновления платежа"""
+    """Обновление платежа"""
 
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
 
 
 class PaymentDestroyAPIView(DestroyAPIView):
-    """Класс для удаления платежа"""
+    """Удаление платежа"""
 
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
 
 
 class PaymentRetrieveAPIView(RetrieveAPIView):
-    """Класс для получения платежа"""
+    """Получение платежа"""
 
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
 
 
 class PaymentListAPIView(ListAPIView):
-    """Класс для получения списка платежей"""
+    """Получение списка платежей"""
 
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
@@ -101,8 +104,33 @@ class PaymentListAPIView(ListAPIView):
 
 
 class SubscriptionCreateOrDeleteAPIView(APIView):
-    """Метод для добавления/удаления подписки пользователя на курс"""
+    """Добавление/удаление подписки пользователя на обновления курса.
+    Если пользователь уже подписан на курс - подписка будет удалена, иначе - добавлена.
+    """
 
+    request_schema = openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "course": openapi.Schema(
+                type=openapi.TYPE_INTEGER, description="идентификатор курса"
+            )
+        },
+        required=["course"],
+    )
+
+    custom_success_response = openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "message": openapi.Schema(
+                type=openapi.TYPE_STRING, description="подписка добавлена"
+            )
+        },
+    )
+
+    @swagger_auto_schema(
+        request_body=request_schema,
+        responses={status.HTTP_200_OK: custom_success_response},
+    )
     def post(self, request):
         user = self.request.user
         course_id = self.request.data.get("course")

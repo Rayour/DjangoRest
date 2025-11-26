@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import (
     CreateAPIView,
     DestroyAPIView,
@@ -14,6 +16,29 @@ from materials.serializer import CourseSerializer, LessonSerializer
 from users.permissions import IsModer, IsOwner
 
 
+@method_decorator(
+    name="list",
+    decorator=swagger_auto_schema(operation_description="Получение списка курсов"),
+)
+@method_decorator(
+    name="retrieve",
+    decorator=swagger_auto_schema(operation_description="Получение курса"),
+)
+@method_decorator(
+    name="create", decorator=swagger_auto_schema(operation_description="Создание курса")
+)
+@method_decorator(
+    name="update",
+    decorator=swagger_auto_schema(operation_description="Обновление курса"),
+)
+@method_decorator(
+    name="partial_update",
+    decorator=swagger_auto_schema(operation_description="Частичное обновление курса"),
+)
+@method_decorator(
+    name="destroy",
+    decorator=swagger_auto_schema(operation_description="Удаление курса"),
+)
 class CourseViewSet(ModelViewSet):
     """Вьюсет для курса обучения"""
 
@@ -44,7 +69,7 @@ class CourseViewSet(ModelViewSet):
 
 
 class LessonCreateAPIView(CreateAPIView):
-    """Класс для создания урока"""
+    """Создание урока"""
 
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
@@ -58,7 +83,7 @@ class LessonCreateAPIView(CreateAPIView):
 
 
 class LessonRetrieveAPIView(RetrieveAPIView):
-    """Класс для получения урока"""
+    """Получение урока"""
 
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
@@ -66,7 +91,7 @@ class LessonRetrieveAPIView(RetrieveAPIView):
 
 
 class LessonUpdateAPIView(UpdateAPIView):
-    """Класс для обновления урока"""
+    """Обновление урока"""
 
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
@@ -74,7 +99,7 @@ class LessonUpdateAPIView(UpdateAPIView):
 
 
 class LessonListAPIView(ListAPIView):
-    """Класс для получения списка уроков"""
+    """Получение списка уроков"""
 
     serializer_class = LessonSerializer
     pagination_class = LessonsCoursesPaginator
@@ -86,7 +111,7 @@ class LessonListAPIView(ListAPIView):
 
 
 class LessonDestroyAPIView(DestroyAPIView):
-    """Класс для уаления урока"""
+    """Удаление урока"""
 
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
