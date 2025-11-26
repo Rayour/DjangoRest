@@ -89,3 +89,32 @@ class Payment(models.Model):
         verbose_name = "платеж"
         verbose_name_plural = "платежи"
         ordering = ["payment_date", "created_at"]
+
+
+class Subscription(models.Model):
+    """Модель подписки на курс"""
+
+    user = models.ForeignKey(
+        CustomUser,
+        verbose_name="Пользователь",
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+    )
+    course = models.ForeignKey(
+        "materials.Course",
+        verbose_name="Курс",
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+    )
+    created_at = models.DateTimeField(verbose_name="Дата создания", auto_now_add=True)
+    updated_at = models.DateTimeField(verbose_name="Дата обновления", auto_now=True)
+
+    def __str__(self):
+        """Строковое представление объекта подписки"""
+
+        return f"Пользователь: {self.user}, курс: {self.course}"
+
+    class Meta:
+        verbose_name = "подписка"
+        verbose_name_plural = "подписки"
+        ordering = ["created_at"]
