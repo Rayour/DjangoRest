@@ -13,6 +13,7 @@ from users.views import (
     PaymentDestroyAPIView,
     PaymentListAPIView,
     PaymentRetrieveAPIView,
+    PaymentStatusCheckAPIView,
     PaymentUpdateAPIView,
     SubscriptionCreateOrDeleteAPIView,
 )
@@ -31,6 +32,11 @@ urlpatterns = [
         "payments/<int:pk>/update/",
         PaymentUpdateAPIView.as_view(),
         name="payment_update",
+    ),
+    path(
+        "payments/<int:pk>/status/",
+        PaymentStatusCheckAPIView.as_view(),
+        name="payment_status_check",
     ),
     path(
         "payments/<int:pk>/", PaymentRetrieveAPIView.as_view(), name="payment_retrieve"

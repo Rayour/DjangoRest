@@ -15,9 +15,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from materials.models import Course
+from materials.models import Course, Lesson
 from users.models import CustomUser, Payment, Subscription
 from users.serializer import CustomUserSerializer, PaymentSerializer
+from users.servises import (
+    create_stripe_price,
+    create_stripe_product,
+    create_stripe_session,
+    get_stripe_payment_status,
+)
 
 
 class CustomUserCreateAPIView(CreateAPIView):
@@ -69,6 +75,19 @@ class PaymentCreateAPIView(CreateAPIView):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
 
+    def perform_create(self, serializer):
+        """Метод создания платежа"""
+
+        payment = serializer.save()
+        if payment.course:
+            payment_product = payment.course.name
+        else:
+            payment_product = payment.lesson.name
+        stripe_product_id = create_stripe_product(payment_product)
+        stripe_price_id = create_stripe_price(payment.payment_amount, stripe_product_id)
+        payment.session_id, payment.payment_url = create_stripe_session(stripe_price_id)
+        payment.save()
+
 
 class PaymentUpdateAPIView(UpdateAPIView):
     """Обновление платежа"""
@@ -89,6 +108,36 @@ class PaymentRetrieveAPIView(RetrieveAPIView):
 
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
+
+
+class PaymentStatusCheckAPIView(APIView):
+    """Получение статуса платежа"""
+
+    custom_success_response = openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            "message": openapi.Schema(
+                type=openapi.TYPE_STRING, description="payment_status"
+            )
+        },
+    )
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: custom_success_response},
+    )
+    def get(self, request, *args, **kwargs):
+        payment_id = self.kwargs.get("pk")
+        payment_item = get_object_or_404(Payment, pk=payment_id)
+
+        if payment_item:
+            payment_status = get_stripe_payment_status(payment_item.session_id)
+            payment_item.payment_status = payment_status
+            payment_item.save()
+            message = {"payment_status": payment_status}
+        else:
+            message = {"error": f"no payment with id={payment_id}"}
+
+        return Response(message)
 
 
 class PaymentListAPIView(ListAPIView):

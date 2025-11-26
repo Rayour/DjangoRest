@@ -77,6 +77,15 @@ class Payment(models.Model):
     )
     payment_amount = models.FloatField(verbose_name="Сумма платежа")
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
+    payment_status = models.CharField(
+        max_length=20, blank=True, null=True, verbose_name="Статус платежа"
+    )
+    session_id = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name="Идентификатор сессии"
+    )
+    payment_url = models.URLField(
+        max_length=500, blank=True, null=True, verbose_name="Ссылка на оплату"
+    )
     created_at = models.DateTimeField(verbose_name="Дата создания", auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name="Дата обновления", auto_now=True)
 
