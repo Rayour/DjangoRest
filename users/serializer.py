@@ -24,6 +24,7 @@ class CustomUserSerializer(ModelSerializer):
     """Сериализатор для пользователя"""
 
     payments = PaymentSerializer(many=True, read_only=True)
+    subscriptions = SubscriptionSerializer(many=True, read_only=True)
 
     class Meta:
         model = CustomUser
