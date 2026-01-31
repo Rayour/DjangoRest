@@ -1,5 +1,3 @@
-import datetime
-
 from celery import shared_task
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
