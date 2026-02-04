@@ -42,6 +42,7 @@ jobs:
     needs: lint
     env:
       SECRET_KEY: "ci-test-key"
+      USE_SQLITE: "True"
 
     steps:
     - name: Check out code
