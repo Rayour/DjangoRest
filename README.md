@@ -38,7 +38,13 @@ docker-compose ps
     sudo ufw allow 22/tcp
     ```
    4. Проверьте статус файервола, убедитесь, что порты открыты `sudo ufw status`
-6. 
+6. Создайте в репозитории следующие secrets:
+   * DEPLOY_DIR - директория для деплоя приложения
+   * DOCKER_HUB_ACCESS_TOKEN - docker hub access token 
+   * DOCKER_HUB_USERNAME - docker hub username
+   * SERVER_IP - публичный IP вашей виртуальной машины
+   * SSH_KEY - ключ для подключения по ssh
+   * SSH_USER - пользователь для подключения по ssh к вашей виртуальной машине
 ## Использование:
 
 Пока проект содержит отдельные модули, раздел об использовании будет дополнен позже.
