@@ -1,4 +1,4 @@
-name: Django CI
+name: Django CI/CD
 
 on: [push, pull_request]
 
@@ -36,7 +36,7 @@ jobs:
         run: poetry add --group lint flake8
 
       - name: Run Flake8
-        run: flake8 .
+        run: poetry run flake8 .
 
   test:
     runs-on: ubuntu-latest
