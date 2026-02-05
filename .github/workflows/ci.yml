@@ -80,6 +80,11 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
+      # ШАГ 1: Проверяем, что файлы вообще есть в самом GitHub (для отладки)
+      - name: List files in GitHub Workspace
+        run: ls -la
+
+      # ШАГ 2: Копируем файлы.
       - name: Copy config files
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -87,8 +92,11 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: "docker-compose.yml,nginx.conf"
-          target: "~/myapp"
+          target: "/home/${{ secrets.SSH_USER }}/myapp"
+          rm: false
+          strip_components: 0
 
+      # ШАГ 3: Запуск деплоя
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -96,17 +104,30 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ~/myapp
+            cd /home/${{ secrets.SSH_USER }}/myapp
 
-            # Удаляем старые упоминания тега и юзера, если они были
-            sed -i '/IMAGE_TAG/d' .env
-            sed -i '/DOCKER_USERNAME/d' .env
-            # Дописываем свежие
+            echo "--- Debug: Checking files on server ---"
+            pwd
+            ls -la
+
+            if [ ! -f "docker-compose.yml" ]; then
+              echo "!!! ERROR: docker-compose.yml NOT FOUND ON SERVER !!!"
+              exit 1
+            fi
+
+            # Обновляем динамические переменные в .env
+            # Сначала убеждаемся, что .env существует
+            touch .env
+            sed -i "/IMAGE_TAG/d" .env || true
+            sed -i "/DOCKER_USERNAME/d" .env || true
             echo "IMAGE_TAG=${{ github.sha }}" >> .env
             echo "DOCKER_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}" >> .env
 
+            # Логинимся и запускаем
             echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | sudo docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-            
-            sudo docker-compose pull
-            sudo docker-compose up -d --remove-orphans
-            sudo docker image prune -f
+
+            sudo docker compose pull
+            sudo docker compose up -d --remove-orphans
+
+            echo "--- Containers Status ---"
+            sudo docker compose ps
