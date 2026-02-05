@@ -57,23 +57,25 @@ services:
   celery_worker:
     image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
     container_name: celery_worker
+    env_file:
+      - ./.env
     restart: always
     command: celery -A config worker -l info -P eventlet
 #    volumes:
 #      - .:/code
-    environment:
-      - DATABASE_NAME=${DATABASE_NAME}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_PORT=${DATABASE_PORT}
-      - SECRET_KEY=${SECRET_KEY}
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-      - STRIPE_API_KEY=${STRIPE_API_KEY}
-      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
-      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
-      - PYTHONPATH=/code
+#    environment:
+#      - DATABASE_NAME=${DATABASE_NAME}
+#      - DATABASE_USER=${DATABASE_USER}
+#      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+#      - DATABASE_HOST=${DATABASE_HOST}
+#      - DATABASE_PORT=${DATABASE_PORT}
+#      - SECRET_KEY=${SECRET_KEY}
+#      - CELERY_BROKER_URL=redis://redis:6379/0
+#      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+#      - STRIPE_API_KEY=${STRIPE_API_KEY}
+#      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+#      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+#      - PYTHONPATH=/code
     depends_on:
       - db
       - redis
@@ -81,18 +83,20 @@ services:
   celery_beat:
     image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
     container_name: celery_beat
+    env_file:
+      - ./.env
     restart: always
     command: celery -A config beat -l info
 #    volumes:
 #      - .:/code
-    environment:
-      - DATABASE_NAME=${DATABASE_NAME}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_PORT=${DATABASE_PORT}
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - PYTHONPATH=/code
+#    environment:
+#      - DATABASE_NAME=${DATABASE_NAME}
+#      - DATABASE_USER=${DATABASE_USER}
+#      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+#      - DATABASE_HOST=${DATABASE_HOST}
+#      - DATABASE_PORT=${DATABASE_PORT}
+#      - CELERY_BROKER_URL=redis://redis:6379/0
+#      - PYTHONPATH=/code
     depends_on:
       - db
       - redis
