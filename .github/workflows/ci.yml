@@ -5,7 +5,6 @@ on: [push, pull_request]
 jobs:
   lint:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -20,16 +19,14 @@ jobs:
         with:
           version: 2.1.2
           virtualenvs-create: true
-          virtualenvs-in-project: true # Creates a .venv folder in the project root
+          virtualenvs-in-project: true
 
       - name: Cache Poetry dependencies
         uses: actions/cache@v4
         id: cache-deps
         with:
-          path: .venv # The path depends on the virtualenvs-in-project setting
+          path: .venv
           key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-venv-
 
       - name: Install dependencies
         run: poetry install --with lint --no-root
@@ -43,46 +40,27 @@ jobs:
     env:
       SECRET_KEY: "ci-test-key"
       USE_SQLITE: "True"
-
     steps:
-    - name: Check out code
-      uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.13'
-
-    - name: Install and configure Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 2.1.2
-        virtualenvs-create: true
-        virtualenvs-in-project: true # Creates a .venv folder in the project root
-
-    - name: Cache Poetry dependencies
-      uses: actions/cache@v4
-      id: cache-deps
-      with:
-        path: .venv # The path depends on the virtualenvs-in-project setting
-        key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-venv-
-
-    - name: Install dependencies
-      if: steps.cache-deps.outputs.cache-hit != 'true' # Only run install if the cache is missed
-      run: poetry install --no-interaction --no-root
-
-    - name: Run migrations
-      run: poetry run python manage.py migrate
-
-    - name: Run tests
-      run: poetry run python manage.py test
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.1.2
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+      - name: Run tests
+        run: poetry run python manage.py test
 
   build:
     runs-on: ubuntu-latest
     needs: test
-
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -90,36 +68,43 @@ jobs:
       - name: Log in to Docker Hub
         run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} .
-
-      - name: Push Docker image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+      - name: Build and Push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-
     steps:
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Copy config files
+        uses: appleboy/scp-action@v0.1.7
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "docker-compose.yml,nginx.conf"
+          target: "~/myapp"
 
       - name: Deploy to Server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd /myapp
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/myapp
+
+            touch .env
+
+            grep -q "^DOCKER_USERNAME=" .env && sed -i "s/^DOCKER_USERNAME=.*/DOCKER_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}/" .env || echo "DOCKER_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}" >> .env
+            grep -q "^IMAGE_TAG=" .env && sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${{ github.sha }}/" .env || echo "IMAGE_TAG=${{ github.sha }}" >> .env
+
+            echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | sudo docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
             
-            # Обновляем тег образа в .env или через переменную
-            export DOCKER_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
-            export IMAGE_TAG=${{ github.sha }}
-            
-            echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | sudo docker login -u $DOCKER_USERNAME --password-stdin
-            
-            # Флаг -E передает export-переменные внутрь sudo
-            sudo -E docker-compose pull
-            sudo -E docker-compose up -d --force-recreate
-            
+            sudo docker-compose pull
+            sudo docker-compose up -d --remove-orphans
             sudo docker image prune -f
-          EOF
