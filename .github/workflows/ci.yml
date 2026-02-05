@@ -98,10 +98,12 @@ jobs:
           script: |
             cd ~/myapp
 
-            touch .env
-
-            grep -q "^DOCKER_USERNAME=" .env && sed -i "s/^DOCKER_USERNAME=.*/DOCKER_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}/" .env || echo "DOCKER_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}" >> .env
-            grep -q "^IMAGE_TAG=" .env && sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${{ github.sha }}/" .env || echo "IMAGE_TAG=${{ github.sha }}" >> .env
+            # Удаляем старые упоминания тега и юзера, если они были
+            sed -i '/IMAGE_TAG/d' .env
+            sed -i '/DOCKER_USERNAME/d' .env
+            # Дописываем свежие
+            echo "IMAGE_TAG=${{ github.sha }}" >> .env
+            echo "DOCKER_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}" >> .env
 
             echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | sudo docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
             
