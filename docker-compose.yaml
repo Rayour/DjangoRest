@@ -24,7 +24,7 @@ services:
       - ./html:/usr/share/nginx/html
 
   web:
-    build: .
+    image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
     container_name: app_web
     restart: always
     command: >
@@ -52,7 +52,7 @@ services:
       - redis
 
   celery_worker:
-    build: .
+    image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
     container_name: celery_worker
     restart: always
     command: celery -A config worker -l info -P eventlet
