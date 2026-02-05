@@ -20,7 +20,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - static_volume:/code/static:ro
 
   web:
@@ -82,8 +82,8 @@ services:
     container_name: celery_beat
     restart: always
     command: celery -A config beat -l info
-    volumes:
-      - .:/code
+#    volumes:
+#      - .:/code
     environment:
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_USER=${DATABASE_USER}
