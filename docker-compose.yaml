@@ -20,8 +20,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./html:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/code/static:ro
 
   web:
     image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
@@ -33,7 +33,7 @@ services:
       sh -c "python manage.py migrate && 
              python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/code
+#      - .:/code
       - static_volume:/code/static
 #    environment:
 #      - DATABASE_NAME=${DATABASE_NAME}
@@ -58,8 +58,8 @@ services:
     container_name: celery_worker
     restart: always
     command: celery -A config worker -l info -P eventlet
-    volumes:
-      - .:/code
+#    volumes:
+#      - .:/code
     environment:
       - DATABASE_NAME=${DATABASE_NAME}
       - DATABASE_USER=${DATABASE_USER}
