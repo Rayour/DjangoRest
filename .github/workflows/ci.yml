@@ -109,8 +109,13 @@ jobs:
       - name: Deploy to Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
-            sudo docker stop myapp || true
-            sudo docker rm myapp || true
-            sudo docker run -d --name myapp -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+            cd /myapp
+            
+            # Обновляем тег образа в .env или через переменную
+            export IMAGE_TAG=${{ github.sha }}
+            
+            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+            docker-compose pull
+            docker-compose up -d
+            docker image prune -f # Чистим старые образы
           EOF
