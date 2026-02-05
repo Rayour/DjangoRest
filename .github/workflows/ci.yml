@@ -110,8 +110,8 @@ jobs:
             pwd
             ls -la
 
-            if [ ! -f "docker-compose.yml" ]; then
-              echo "!!! ERROR: docker-compose.yml NOT FOUND ON SERVER !!!"
+            if [ ! -f "docker-compose.yaml" ]; then
+              echo "!!! ERROR: docker-compose.yaml NOT FOUND ON SERVER !!!"
               exit 1
             fi
 
