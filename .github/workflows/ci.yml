@@ -115,8 +115,11 @@ jobs:
             export DOCKER_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
             export IMAGE_TAG=${{ github.sha }}
             
-            sudo docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-            sudo docker-compose pull
-            sudo docker-compose up -d
-            sudo docker image prune -f # Чистим старые образы
+            echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | sudo docker login -u $DOCKER_USERNAME --password-stdin
+            
+            # Флаг -E передает export-переменные внутрь sudo
+            sudo -E docker-compose pull
+            sudo -E docker-compose up -d --force-recreate
+            
+            sudo docker image prune -f
           EOF
