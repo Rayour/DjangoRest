@@ -91,7 +91,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "docker-compose.yml,nginx.conf"
+          source: "docker-compose.yaml,nginx.conf"
           target: "/home/${{ secrets.SSH_USER }}/myapp"
           rm: false
           strip_components: 0
