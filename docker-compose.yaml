@@ -77,7 +77,7 @@ services:
       - redis
 
   celery_beat:
-    build: .
+    image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
     container_name: celery_beat
     restart: always
     command: celery -A config beat -l info
