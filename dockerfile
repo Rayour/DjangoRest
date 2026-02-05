@@ -22,3 +22,9 @@ RUN poetry install -vvv --no-root --only main --no-cache --no-interaction
 
 # Копируем остальной код
 COPY . .
+
+RUN mkdir -p /app/staticfiles && chmod -R 755 /app/staticfiles
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "python manage.py collectstatic --no input && gunicorn config.wsgi:application --bind 0.0.0.0:8000"]
