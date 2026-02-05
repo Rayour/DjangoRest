@@ -25,6 +25,8 @@ services:
 
   web:
     image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
+    env_file:
+      - .env
     container_name: app_web
     restart: always
     command: >
