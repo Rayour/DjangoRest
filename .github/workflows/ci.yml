@@ -114,8 +114,8 @@ jobs:
             # Обновляем тег образа в .env или через переменную
             export IMAGE_TAG=${{ github.sha }}
             
-            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-            docker-compose pull
-            docker-compose up -d
-            docker image prune -f # Чистим старые образы
+            sudo docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+            sudo docker-compose pull
+            sudo docker-compose up -d
+            sudo docker image prune -f # Чистим старые образы
           EOF
