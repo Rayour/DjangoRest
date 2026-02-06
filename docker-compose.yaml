@@ -30,7 +30,8 @@ services:
       - main_net
 
   web:
-    image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
+    image: ${DOCKER_USERNAME:-local}/myapp:${IMAGE_TAG:-latest}
+    build: .
     env_file:
       - ./.env
     container_name: app_web
@@ -50,7 +51,8 @@ services:
       - main_net
 
   celery_worker:
-    image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
+    image: ${DOCKER_USERNAME:-local}/myapp:${IMAGE_TAG:-latest}
+    build: .
     container_name: celery_worker
     env_file:
       - ./.env
@@ -63,7 +65,8 @@ services:
       - main_net
 
   celery_beat:
-    image: ${DOCKER_USERNAME}/myapp:${IMAGE_TAG}
+    image: ${DOCKER_USERNAME:-local}/myapp:${IMAGE_TAG:-latest}
+    build: .
     container_name: celery_beat
     env_file:
       - ./.env
