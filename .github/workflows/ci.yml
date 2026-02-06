@@ -1,0 +1,135 @@
+name: Django CI/CD
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.1.2
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v4
+        id: cache-deps
+        with:
+          path: .venv
+          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install --with lint --no-root
+
+      - name: Run Flake8
+        run: poetry run python -m flake8 .
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    env:
+      SECRET_KEY: "ci-test-key"
+      USE_SQLITE: "True"
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.1.2
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+      - name: Run tests
+        run: poetry run python manage.py test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+
+      - name: Build and Push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} .
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      # ШАГ 1: Проверяем, что файлы вообще есть в самом GitHub (для отладки)
+      - name: List files in GitHub Workspace
+        run: ls -la
+
+      # ШАГ 2: Копируем файлы.
+      - name: Copy config files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "docker-compose.yaml,nginx.conf"
+          target: "/home/${{ secrets.SSH_USER }}/myapp"
+          rm: false
+          strip_components: 0
+
+      # ШАГ 3: Запуск деплоя
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.SSH_USER }}/myapp
+
+            echo "--- Debug: Checking files on server ---"
+            pwd
+            ls -la
+
+            if [ ! -f "docker-compose.yaml" ]; then
+              echo "!!! ERROR: docker-compose.yaml NOT FOUND ON SERVER !!!"
+              exit 1
+            fi
+
+            # Обновляем динамические переменные в .env
+            # Сначала убеждаемся, что .env существует
+            touch .env
+            sed -i "/IMAGE_TAG/d" .env || true
+            sed -i "/DOCKER_USERNAME/d" .env || true
+            echo "IMAGE_TAG=${{ github.sha }}" >> .env
+            echo "DOCKER_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}" >> .env
+
+            # Логинимся и запускаем
+            echo "${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}" | sudo docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+
+            sudo docker compose pull
+            sudo docker compose up -d --remove-orphans
+
+            echo "--- Containers Status ---"
+            sudo docker compose ps
+            
+            sudo docker image prune -f

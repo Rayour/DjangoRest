@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from materials.models import Course, Lesson
+from materials.models import Course
 from users.models import CustomUser, Payment, Subscription
 from users.serializer import CustomUserSerializer, PaymentSerializer
 from users.servises import (create_stripe_price, create_stripe_product,
